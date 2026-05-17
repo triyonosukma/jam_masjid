@@ -1,0 +1,1816 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jadwal Digital Masjid</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Orbitron:wght@500;700;800&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --bg: #07110f;
+            --panel: rgba(10, 25, 21, 0.78);
+            --line: rgba(255, 255, 255, 0.12);
+            --green: #10b981;
+            --green-deep: #064e3b;
+            --gold: #fbbf24;
+            --red: #ef4444;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            margin: 0;
+            overflow: hidden;
+            color: #f8fafc;
+            font-family: "Inter", sans-serif;
+            background:
+                radial-gradient(circle at 18% 15%, rgba(16, 185, 129, 0.18), transparent 30%),
+                radial-gradient(circle at 82% 8%, rgba(251, 191, 36, 0.12), transparent 28%),
+                linear-gradient(135deg, #06120f 0%, #081d19 44%, #030712 100%);
+        }
+
+        .app-shell {
+            display: grid;
+            grid-template-rows: auto 1fr auto;
+            min-height: 100vh;
+            padding: clamp(14px, 2vw, 30px);
+            padding-bottom: 92px;
+            gap: clamp(14px, 2vw, 24px);
+        }
+
+        .digital {
+            font-family: "Orbitron", sans-serif;
+            letter-spacing: 0;
+        }
+
+        .top-panel,
+        .prayer-card,
+        .center-panel {
+            border: 1px solid var(--line);
+            background: var(--panel);
+            box-shadow: 0 24px 80px rgba(0, 0, 0, 0.28);
+            backdrop-filter: blur(16px);
+        }
+
+        .top-panel {
+            display: grid;
+            grid-template-columns: minmax(0, 1.35fr) auto;
+            align-items: center;
+            gap: 18px;
+            border-radius: 8px;
+            padding: clamp(14px, 2vw, 24px);
+        }
+
+        .brand-title {
+            color: #ecfdf5;
+            font-size: clamp(28px, 5vw, 64px);
+            line-height: 1;
+            font-weight: 800;
+            text-transform: uppercase;
+        }
+
+        .location-row {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 10px;
+            margin-top: 10px;
+            color: #cbd5e1;
+            font-size: clamp(14px, 1.7vw, 22px);
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .pill {
+            display: inline-flex;
+            align-items: center;
+            min-height: 30px;
+            border-radius: 999px;
+            padding: 5px 12px;
+            border: 1px solid rgba(16, 185, 129, 0.35);
+            background: rgba(6, 78, 59, 0.36);
+            color: #a7f3d0;
+            font-size: 13px;
+            font-weight: 800;
+            text-transform: uppercase;
+            white-space: nowrap;
+        }
+
+        .date-box {
+            min-width: min(360px, 36vw);
+            text-align: right;
+        }
+
+        .date-main {
+            font-size: clamp(18px, 2vw, 30px);
+            font-weight: 800;
+        }
+
+        .date-sub {
+            margin-top: 6px;
+            color: #fde68a;
+            font-size: clamp(14px, 1.4vw, 20px);
+            font-weight: 600;
+        }
+
+        .center-panel {
+            display: grid;
+            place-items: center;
+            min-height: 0;
+            border-radius: 8px;
+            padding: clamp(16px, 2.4vw, 32px);
+            text-align: center;
+        }
+
+        .next-label {
+            color: #a7f3d0;
+            font-size: clamp(17px, 2.1vw, 32px);
+            font-weight: 800;
+            text-transform: uppercase;
+        }
+
+        .countdown {
+            margin-top: 8px;
+            color: var(--gold);
+            font-size: clamp(46px, 8vw, 128px);
+            line-height: 1;
+            text-shadow: 0 0 26px rgba(251, 191, 36, 0.26);
+        }
+
+        .main-clock {
+            margin-top: 12px;
+            color: #ffffff;
+            font-size: clamp(78px, 15vw, 245px);
+            line-height: 0.94;
+            text-shadow: 0 0 34px rgba(16, 185, 129, 0.18);
+        }
+
+        .status-row {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 18px;
+            flex-wrap: wrap;
+        }
+
+        .adzan-status {
+            display: none;
+            align-items: center;
+            gap: 12px;
+            border-radius: 999px;
+            padding: 10px 16px;
+            background: #fbbf24;
+            color: #111827;
+            font-weight: 900;
+            box-shadow: 0 16px 40px rgba(251, 191, 36, 0.25);
+        }
+
+        .adzan-status.show {
+            display: inline-flex;
+        }
+
+        .tiny-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 34px;
+            border-radius: 999px;
+            padding: 7px 12px;
+            background: rgba(2, 6, 23, 0.88);
+            color: #fff;
+            font-size: 12px;
+            font-weight: 900;
+            text-transform: uppercase;
+        }
+
+        .prayer-grid {
+            display: grid;
+            grid-template-columns: repeat(5, minmax(0, 1fr));
+            gap: clamp(10px, 1.5vw, 20px);
+        }
+
+        .prayer-card {
+            min-height: 118px;
+            border-radius: 8px;
+            padding: clamp(12px, 1.6vw, 22px);
+            text-align: center;
+            transition: transform 0.28s ease, border-color 0.28s ease, background 0.28s ease;
+        }
+
+        .prayer-name {
+            display: block;
+            color: #cbd5e1;
+            font-size: clamp(13px, 1.2vw, 18px);
+            font-weight: 800;
+            text-transform: uppercase;
+        }
+
+        .prayer-time {
+            display: block;
+            margin-top: 12px;
+            color: #fff;
+            font-size: clamp(30px, 4vw, 58px);
+            line-height: 1;
+        }
+
+        .active-prayer {
+            border-color: rgba(251, 191, 36, 0.9);
+            background: linear-gradient(180deg, rgba(6, 78, 59, 0.98), rgba(3, 45, 36, 0.98));
+            transform: translateY(-5px);
+        }
+
+        .current-prayer {
+            border-color: rgba(16, 185, 129, 0.85);
+            box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.1), 0 24px 80px rgba(16, 185, 129, 0.18);
+        }
+
+        .marquee-bar {
+            position: fixed;
+            right: 0;
+            bottom: 0;
+            left: 0;
+            z-index: 20;
+            height: 72px;
+            display: flex;
+            align-items: center;
+            overflow: hidden;
+            border-top: 2px solid var(--gold);
+            background: #042f2e;
+        }
+
+        .marquee-track {
+            display: inline-flex;
+            align-items: center;
+            min-width: 100%;
+            white-space: nowrap;
+            will-change: transform;
+            animation: marquee 26s linear infinite;
+        }
+
+        .marquee-text {
+            display: inline-block;
+            padding-left: 100vw;
+            color: #fff;
+            font-size: clamp(24px, 3.2vw, 46px);
+            font-weight: 800;
+            text-transform: uppercase;
+        }
+
+        @keyframes marquee {
+            from {
+                transform: translateX(0);
+            }
+
+            to {
+                transform: translateX(-100%);
+            }
+        }
+
+        .settings-button {
+            position: fixed;
+            right: 22px;
+            bottom: 92px;
+            z-index: 40;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            min-height: 48px;
+            border-radius: 999px;
+            padding: 12px 18px;
+            background: #059669;
+            color: #fff;
+            font-weight: 900;
+            box-shadow: 0 18px 50px rgba(0, 0, 0, 0.38);
+        }
+
+        .admin-panel {
+            position: fixed;
+            right: 0;
+            bottom: 0;
+            left: 0;
+            z-index: 60;
+            max-height: min(88vh, 780px);
+            overflow: auto;
+            border-top: 2px solid rgba(16, 185, 129, 0.8);
+            border-radius: 8px 8px 0 0;
+            background: #0f172a;
+            padding: clamp(18px, 2.5vw, 32px);
+            box-shadow: 0 -28px 80px rgba(0, 0, 0, 0.5);
+            transform: translateY(110%);
+            transition: transform 0.28s ease;
+        }
+
+        .admin-panel.open {
+            transform: translateY(0);
+        }
+
+        .admin-inner {
+            width: min(1180px, 100%);
+            margin: 0 auto;
+        }
+
+        .panel-title-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 16px;
+        }
+
+        .form-field {
+            display: grid;
+            gap: 8px;
+        }
+
+        .form-field.wide {
+            grid-column: span 2;
+        }
+
+        label {
+            color: #cbd5e1;
+            font-size: 12px;
+            font-weight: 900;
+            letter-spacing: 0;
+            text-transform: uppercase;
+        }
+
+        input,
+        select,
+        textarea {
+            width: 100%;
+            min-height: 46px;
+            border: 1px solid #334155;
+            border-radius: 8px;
+            background: #020617;
+            color: #fff;
+            padding: 11px 12px;
+            font: inherit;
+            outline: none;
+        }
+
+        textarea {
+            min-height: 128px;
+            resize: vertical;
+            line-height: 1.45;
+        }
+
+        input:focus,
+        select:focus,
+        textarea:focus {
+            border-color: #10b981;
+            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.16);
+        }
+
+        .manual-times {
+            grid-column: 1 / -1;
+            display: grid;
+            grid-template-columns: repeat(6, minmax(0, 1fr));
+            gap: 12px;
+            padding: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.09);
+            border-radius: 8px;
+            background: rgba(2, 6, 23, 0.45);
+        }
+
+        .help-text {
+            color: #94a3b8;
+            font-size: 13px;
+            line-height: 1.45;
+        }
+
+        .news-manager {
+            grid-column: 1 / -1;
+            border: 1px solid rgba(255, 255, 255, 0.09);
+            border-radius: 8px;
+            background: rgba(2, 6, 23, 0.38);
+            overflow: hidden;
+        }
+
+        .news-header,
+        .news-toolbar,
+        .news-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 14px 16px;
+        }
+
+        .news-header {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .news-toolbar,
+        .news-footer {
+            flex-wrap: wrap;
+        }
+
+        .news-toolbar label {
+            text-transform: none;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .news-table-wrap {
+            overflow-x: auto;
+        }
+
+        .news-table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 720px;
+        }
+
+        .news-table th {
+            background: #050505;
+            color: #fff;
+            text-align: left;
+            font-size: 13px;
+            font-weight: 900;
+            text-transform: uppercase;
+        }
+
+        .news-table th,
+        .news-table td {
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+            padding: 13px 14px;
+            vertical-align: top;
+        }
+
+        .news-table td {
+            color: #e2e8f0;
+            font-size: 14px;
+        }
+
+        .news-number {
+            width: 70px;
+        }
+
+        .news-date {
+            width: 150px;
+            white-space: nowrap;
+        }
+
+        .news-actions {
+            width: 190px;
+            white-space: nowrap;
+        }
+
+        .mini-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 34px;
+            border-radius: 6px;
+            padding: 7px 11px;
+            color: #fff;
+            font-size: 12px;
+            font-weight: 900;
+            margin-right: 6px;
+        }
+
+        .btn-blue {
+            background: #0284c7;
+        }
+
+        .modal-backdrop {
+            position: fixed;
+            inset: 0;
+            z-index: 90;
+            display: grid;
+            place-items: center;
+            padding: 18px;
+            background: rgba(2, 6, 23, 0.72);
+        }
+
+        .modal-card {
+            width: min(620px, 100%);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 8px;
+            background: #0f172a;
+            padding: 20px;
+            box-shadow: 0 30px 90px rgba(0, 0, 0, 0.55);
+        }
+
+        .actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 18px;
+        }
+
+        .action-btn {
+            min-height: 46px;
+            border-radius: 8px;
+            padding: 11px 18px;
+            font-weight: 900;
+        }
+
+        .btn-primary {
+            background: #059669;
+            color: white;
+        }
+
+        .btn-gold {
+            background: #d97706;
+            color: white;
+        }
+
+        .btn-muted {
+            background: #334155;
+            color: white;
+        }
+
+        .btn-danger {
+            background: #b91c1c;
+            color: white;
+        }
+
+        .toast {
+            position: fixed;
+            left: 50%;
+            bottom: 90px;
+            z-index: 80;
+            max-width: min(560px, calc(100vw - 28px));
+            transform: translate(-50%, 24px);
+            opacity: 0;
+            pointer-events: none;
+            border-radius: 8px;
+            padding: 12px 16px;
+            background: #ecfdf5;
+            color: #064e3b;
+            font-weight: 800;
+            box-shadow: 0 18px 50px rgba(0, 0, 0, 0.35);
+            transition: opacity 0.24s ease, transform 0.24s ease;
+        }
+
+        .toast.show {
+            transform: translate(-50%, 0);
+            opacity: 1;
+        }
+
+        .flash-adzan {
+            animation: adzanPulse 1.2s ease-in-out infinite;
+        }
+
+        @keyframes adzanPulse {
+
+            0%,
+            100% {
+                background-color: #07110f;
+            }
+
+            50% {
+                background-color: #064e3b;
+            }
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        /* Compact mosque-display layout inspired by common TV running text systems. */
+        .app-shell {
+            grid-template-rows: 56px minmax(0, 1fr) auto auto;
+            padding: 0 0 72px;
+            gap: 0;
+            background: #07131a;
+        }
+
+        .top-panel {
+            grid-template-columns: minmax(220px, 1fr) minmax(300px, 1.2fr) minmax(190px, 1fr);
+            gap: 10px;
+            min-height: 56px;
+            border: 0;
+            border-radius: 0;
+            padding: 6px 10px;
+            background: rgba(9, 21, 28, 0.98);
+            box-shadow: none;
+        }
+
+        .brand-center {
+            min-width: 0;
+            text-align: center;
+        }
+
+        .brand-title {
+            color: #fff200;
+            font-size: clamp(18px, 2.2vw, 28px);
+            text-transform: none;
+            line-height: 1.08;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+        }
+
+        .location-row {
+            justify-content: center;
+            margin-top: 2px;
+            gap: 6px;
+            color: #f8fafc;
+            font-size: clamp(10px, 1vw, 13px);
+            font-weight: 700;
+            text-transform: none;
+        }
+
+        .pill {
+            min-height: 20px;
+            padding: 2px 7px;
+            font-size: 10px;
+        }
+
+        .date-box {
+            min-width: 0;
+            text-align: left;
+        }
+
+        .date-main {
+            font-size: clamp(13px, 1.3vw, 18px);
+            color: #ffffff;
+        }
+
+        .date-sub {
+            margin-top: 2px;
+            color: #fff200;
+            font-family: Georgia, serif;
+            font-size: clamp(12px, 1.15vw, 16px);
+            font-style: italic;
+        }
+
+        .main-clock {
+            margin: 0;
+            color: #fff200;
+            font-size: clamp(30px, 4vw, 50px);
+            line-height: 1;
+            text-align: right;
+            text-shadow: 0 2px 2px rgba(0, 0, 0, 0.55);
+        }
+
+        .center-panel {
+            position: relative;
+            min-height: 0;
+            border: 0;
+            border-radius: 0;
+            padding: clamp(24px, 4vw, 54px) 20px;
+            background:
+                linear-gradient(180deg, rgba(2, 6, 23, 0.1) 0%, rgba(2, 6, 23, 0.08) 48%, rgba(2, 6, 23, 0.72) 100%),
+                url("https://images.unsplash.com/photo-1542816417-0983c9c9ad53?auto=format&fit=crop&w=1800&q=80") center 48% / cover no-repeat;
+            box-shadow: none;
+            overflow: hidden;
+        }
+
+        .hero-content {
+            width: min(1040px, 100%);
+            margin: 0 auto;
+            text-align: center;
+            text-shadow: 0 2px 5px rgba(0, 0, 0, 0.68);
+        }
+
+        .hadith-arabic {
+            color: #ffffff;
+            font-family: Georgia, "Times New Roman", serif;
+            font-size: clamp(28px, 4.4vw, 68px);
+            font-weight: 700;
+            line-height: 1.35;
+            direction: rtl;
+        }
+
+        .hadith-text {
+            width: min(980px, 100%);
+            margin: 12px auto 0;
+            color: #ffffff;
+            font-size: clamp(18px, 2.2vw, 32px);
+            font-weight: 800;
+            line-height: 1.22;
+        }
+
+        .hadith-source {
+            margin-top: 6px;
+            color: #f8fafc;
+            font-size: clamp(14px, 1.6vw, 21px);
+            font-weight: 800;
+        }
+
+        .next-box {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            margin-top: clamp(14px, 3vw, 34px);
+            border-radius: 999px;
+            padding: 8px 16px;
+            background: rgba(2, 6, 23, 0.64);
+            border: 1px solid rgba(255, 255, 255, 0.22);
+        }
+
+        .next-label {
+            color: #ffffff;
+            font-size: clamp(12px, 1.25vw, 16px);
+            letter-spacing: 0;
+        }
+
+        .countdown {
+            margin: 0;
+            color: #fff200;
+            font-size: clamp(20px, 2.4vw, 34px);
+        }
+
+        .activity-strip {
+            display: grid;
+            grid-template-columns: 130px repeat(3, minmax(0, 1fr));
+            min-height: 66px;
+            background: rgba(0, 0, 0, 0.62);
+            border-top: 1px solid rgba(255, 255, 255, 0.22);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.22);
+        }
+
+        .activity-label {
+            display: grid;
+            place-items: center;
+            padding: 8px;
+            background: rgba(2, 6, 23, 0.64);
+            color: #fff;
+            font-size: 16px;
+            font-weight: 900;
+            line-height: 1.1;
+        }
+
+        .activity-item {
+            min-width: 0;
+            padding: 9px 12px;
+            color: #fff;
+            border-left: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .activity-title {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            font-size: clamp(12px, 1.2vw, 15px);
+            font-weight: 900;
+        }
+
+        .activity-date {
+            margin-top: 5px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            color: #e2e8f0;
+            font-size: clamp(10px, 1vw, 12px);
+            font-weight: 600;
+        }
+
+        .prayer-grid {
+            grid-template-columns: repeat(6, minmax(0, 1fr));
+            gap: 0;
+        }
+
+        .prayer-card {
+            min-height: 86px;
+            border: 0;
+            border-radius: 0;
+            padding: 10px 8px 8px;
+            background: rgba(15, 23, 42, 0.9);
+            box-shadow: none;
+        }
+
+        .prayer-card-subuh {
+            background: linear-gradient(180deg, #ef4444, #dc2626);
+        }
+
+        .prayer-card-terbit {
+            background: linear-gradient(180deg, #64748b, #475569);
+        }
+
+        .prayer-card-dzuhur {
+            background: linear-gradient(180deg, #06b6d4, #0891b2);
+        }
+
+        .prayer-card-ashar {
+            background: linear-gradient(180deg, #22c55e, #15803d);
+        }
+
+        .prayer-card-maghrib {
+            background: linear-gradient(180deg, #f59e0b, #d97706);
+        }
+
+        .prayer-card-isya {
+            background: linear-gradient(180deg, #ec4899, #be185d);
+        }
+
+        .prayer-name {
+            color: #ffffff;
+            font-size: clamp(15px, 1.5vw, 20px);
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+        }
+
+        .prayer-time {
+            margin-top: 4px;
+            font-size: clamp(32px, 4vw, 56px);
+            text-shadow: 0 2px 3px rgba(0, 0, 0, 0.45);
+        }
+
+        .active-prayer {
+            outline: 5px solid #fff200;
+            outline-offset: -5px;
+            transform: none;
+        }
+
+        .current-prayer {
+            box-shadow: inset 0 0 0 5px rgba(255, 255, 255, 0.5);
+        }
+
+        .marquee-bar {
+            height: 40px;
+            background: #050505;
+            border-top: 0;
+        }
+
+        .marquee-text {
+            color: #ffffff;
+            font-size: clamp(18px, 2.4vw, 32px);
+        }
+
+        @media (max-width: 900px) {
+            body {
+                overflow: auto;
+            }
+
+            .app-shell {
+                min-height: 100dvh;
+                grid-template-rows: auto minmax(360px, 1fr) auto auto;
+                padding-bottom: 40px;
+            }
+
+            .top-panel {
+                grid-template-columns: 1fr;
+                min-height: auto;
+                text-align: center;
+            }
+
+            .date-box {
+                min-width: 0;
+                text-align: center;
+            }
+
+            .main-clock {
+                text-align: center;
+            }
+
+            .activity-strip {
+                grid-template-columns: 1fr;
+            }
+
+            .activity-label {
+                min-height: 42px;
+            }
+
+            .prayer-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+
+            .prayer-grid .prayer-card:last-child {
+                grid-column: 1 / -1;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .form-field.wide,
+            .manual-times,
+            .news-manager {
+                grid-column: auto;
+            }
+
+            .manual-times {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+
+            .settings-button {
+                right: 14px;
+                bottom: 88px;
+                min-height: 44px;
+                padding: 10px 14px;
+            }
+        }
+    </style>
+</head>
+
+<body id="mainBody">
+    <audio id="adzanAudio" preload="auto">
+        <source src="https://archive.org/download/AdhanMakkah/adhan.mp3" type="audio/mpeg">
+    </audio>
+
+    <div class="app-shell">
+        <header class="top-panel">
+            <div class="date-box">
+                <div id="dateMasehi" class="date-main">-- --- ----</div>
+                <div id="dateHijri" class="date-sub">--</div>
+            </div>
+            <div class="brand-center">
+                <h1 id="displayMasjidName" class="brand-title">Masjid Al-Ikhlas</h1>
+                <div class="location-row">
+                    <span id="displayAddress">Jl. Masjid Raya</span>
+                    <span id="displayCity">Memuat lokasi...</span>
+                    <span id="scheduleModeBadge" class="pill">Otomatis</span>
+                </div>
+            </div>
+            <div id="mainClock" class="digital main-clock">00:00:00</div>
+        </header>
+
+        <main class="center-panel">
+            <div class="hero-content">
+                <div id="hadithArabicDisplay" class="hadith-arabic">وَأَقِيمُوا الصَّلَاةَ وَآتُوا الزَّكَاةَ وَارْكَعُوا مَعَ الرَّاكِعِينَ</div>
+                <div id="hadithTextDisplay" class="hadith-text">Dan dirikanlah shalat, tunaikanlah zakat dan rukuklah beserta orang-orang yang rukuk.</div>
+                <div id="hadithSourceDisplay" class="hadith-source">QS. Al-Baqarah: 43</div>
+                <div class="next-box">
+                    <span id="nextPrayerLabel" class="next-label">Memuat jadwal...</span>
+                    <span id="countdown" class="digital countdown">00:00:00</span>
+                </div>
+                <div class="status-row">
+                    <div id="adzanStatus" class="adzan-status">
+                        <span id="adzanStatusText">Waktunya adzan</span>
+                        <button type="button" onclick="stopAdzan()" class="tiny-btn">Matikan</button>
+                    </div>
+                    <span id="audioHint" class="pill hidden">Klik Test Suara sekali agar browser mengizinkan audio</span>
+                </div>
+            </div>
+        </main>
+
+        <section id="activityStrip" class="activity-strip" aria-label="Kegiatan masjid"></section>
+        <section id="prayerCards" class="prayer-grid" aria-label="Jadwal shalat"></section>
+    </div>
+
+    <footer class="marquee-bar">
+        <div id="marqueeTrack" class="marquee-track">
+            <span id="displayMarquee" class="marquee-text">Selamat datang</span>
+        </div>
+    </footer>
+
+    <button type="button" onclick="togglePanel()" class="settings-button" aria-label="Buka pengaturan">
+        <span aria-hidden="true">&#9881;</span>
+        <span>Pengaturan</span>
+    </button>
+
+    <aside id="adminPanel" class="admin-panel" aria-label="Panel pengaturan">
+        <div class="admin-inner">
+            <div class="panel-title-row">
+                <div>
+                    <h2 class="text-2xl font-extrabold text-emerald-300">Konfigurasi Display Masjid</h2>
+                    <p class="help-text mt-1">Pilih jadwal otomatis dari kota atau isi manual. Setiap baris pesan akan tampil bergantian di teks berjalan.</p>
+                </div>
+                <button type="button" onclick="togglePanel()" class="action-btn btn-muted">Tutup</button>
+            </div>
+
+            <div class="form-grid">
+                <div class="form-field wide">
+                    <label for="inputMasjid">Nama Masjid</label>
+                    <input type="text" id="inputMasjid" placeholder="Masjid Al-Ikhlas">
+                </div>
+
+                <div class="form-field wide">
+                    <label for="inputAddress">Alamat Masjid</label>
+                    <input type="text" id="inputAddress" placeholder="Jl. Panjang No.123, Kapuk">
+                </div>
+
+                <div class="form-field">
+                    <label for="scheduleMode">Sumber Jadwal</label>
+                    <select id="scheduleMode" onchange="handleModeChange()">
+                        <option value="auto">Otomatis dari kota</option>
+                        <option value="manual">Manual</option>
+                    </select>
+                </div>
+
+                <div class="form-field">
+                    <label for="inputAdzan">Suara Adzan</label>
+                    <select id="inputAdzan">
+                        <option value="on">Aktif</option>
+                        <option value="off">Mati</option>
+                    </select>
+                </div>
+
+                <div id="cityField" class="form-field wide">
+                    <label for="inputCityName">Kota / Kabupaten</label>
+                    <input type="text" id="inputCityName" list="cityDataList" placeholder="Ketik atau pilih kota..." autocomplete="off">
+                    <datalist id="cityDataList"></datalist>
+                    <p id="cityHelp" class="help-text">Jadwal otomatis membutuhkan koneksi internet dari browser.</p>
+                </div>
+
+                <div class="form-field wide">
+                    <label for="inputAdzanUrl">Link Audio Adzan</label>
+                    <input type="url" id="inputAdzanUrl" placeholder="https://.../adzan.mp3">
+                    <p class="help-text">Boleh dikosongkan untuk memakai audio bawaan. Jika tidak bunyi, taruh file adzan.mp3 di folder yang sama lalu isi: adzan.mp3</p>
+                </div>
+
+                <div class="form-field wide">
+                    <label for="inputHadithArabic">Hadist / Ayat Arab</label>
+                    <textarea id="inputHadithArabic" placeholder="Tulis teks Arab yang tampil di tengah layar"></textarea>
+                </div>
+
+                <div class="form-field wide">
+                    <label for="inputHadithText">Terjemah Hadist / Ayat</label>
+                    <textarea id="inputHadithText" placeholder="Tulis terjemah atau isi hadist"></textarea>
+                </div>
+
+                <div class="form-field wide">
+                    <label for="inputHadithSource">Sumber Hadist / Ayat</label>
+                    <input type="text" id="inputHadithSource" placeholder="Contoh: HR. Bukhari atau QS. Al-Baqarah: 43">
+                </div>
+
+                <div id="manualTimes" class="manual-times">
+                    <div class="form-field">
+                        <label for="manual-subuh">Subuh</label>
+                        <input type="time" id="manual-subuh">
+                    </div>
+                    <div class="form-field">
+                        <label for="manual-terbit">Terbit</label>
+                        <input type="time" id="manual-terbit">
+                    </div>
+                    <div class="form-field">
+                        <label for="manual-dzuhur">Dzuhur</label>
+                        <input type="time" id="manual-dzuhur">
+                    </div>
+                    <div class="form-field">
+                        <label for="manual-ashar">Ashar</label>
+                        <input type="time" id="manual-ashar">
+                    </div>
+                    <div class="form-field">
+                        <label for="manual-maghrib">Maghrib</label>
+                        <input type="time" id="manual-maghrib">
+                    </div>
+                    <div class="form-field">
+                        <label for="manual-isya">Isya</label>
+                        <input type="time" id="manual-isya">
+                    </div>
+                </div>
+
+                <section class="news-manager" aria-label="Display berita">
+                    <div class="news-header">
+                        <div>
+                            <h3 class="text-xl font-extrabold text-white">Display Berita</h3>
+                            <p class="help-text mt-1">Data berita ini akan tampil bergantian di teks berjalan.</p>
+                        </div>
+                        <button type="button" onclick="openNewsForm()" class="action-btn btn-primary">+ Tambah</button>
+                    </div>
+
+                    <div class="news-toolbar">
+                        <label class="flex items-center gap-2 normal-case text-slate-300">
+                            Show
+                            <select id="newsPageSize" onchange="changeNewsPageSize()" class="min-h-0 w-auto py-2">
+                                <option value="5">5</option>
+                                <option value="10" selected>10</option>
+                                <option value="25">25</option>
+                                <option value="999">Semua</option>
+                            </select>
+                            entries
+                        </label>
+                        <label class="flex items-center gap-2 normal-case text-slate-300">
+                            Search:
+                            <input type="search" id="newsSearch" oninput="handleNewsSearch()" class="min-h-0 w-64 max-w-full py-2" placeholder="Cari berita...">
+                        </label>
+                    </div>
+
+                    <div class="news-table-wrap">
+                        <table class="news-table">
+                            <thead>
+                                <tr>
+                                    <th class="news-number">No</th>
+                                    <th class="news-date">Tanggal</th>
+                                    <th>Berita</th>
+                                    <th class="news-actions">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="newsTableBody"></tbody>
+                        </table>
+                    </div>
+
+                    <div class="news-footer">
+                        <span id="newsInfo" class="help-text">Showing 0 to 0 of 0 entries</span>
+                        <div class="flex items-center gap-2">
+                            <button type="button" onclick="changeNewsPage(-1)" class="mini-btn btn-muted">Previous</button>
+                            <span id="newsPageBadge" class="mini-btn btn-blue">1</span>
+                            <button type="button" onclick="changeNewsPage(1)" class="mini-btn btn-muted">Next</button>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <div class="actions">
+                <button type="button" onclick="saveSettings()" class="action-btn btn-primary">Simpan Perubahan</button>
+                <button type="button" onclick="testAdzan()" class="action-btn btn-gold">Test Suara</button>
+                <button type="button" onclick="stopAdzan()" class="action-btn btn-danger">Matikan Adzan</button>
+                <button type="button" onclick="toggleFullScreen()" class="action-btn btn-muted">Layar Penuh</button>
+            </div>
+        </div>
+    </aside>
+
+    <div id="newsModal" class="modal-backdrop hidden">
+        <form class="modal-card" onsubmit="saveNewsItem(event)">
+            <div class="panel-title-row">
+                <h3 id="newsModalTitle" class="text-2xl font-extrabold text-emerald-300">Tambah Berita</h3>
+                <button type="button" onclick="closeNewsForm()" class="action-btn btn-muted">Tutup</button>
+            </div>
+            <input type="hidden" id="newsEditId">
+            <div class="form-field mb-4">
+                <label for="newsDateInput">Tanggal</label>
+                <input type="date" id="newsDateInput" required>
+            </div>
+            <div class="form-field">
+                <label for="newsTextInput">Berita</label>
+                <textarea id="newsTextInput" required placeholder="Tulis isi berita yang akan tampil di running text"></textarea>
+            </div>
+            <div class="actions">
+                <button type="submit" class="action-btn btn-primary">Simpan Berita</button>
+                <button type="button" onclick="closeNewsForm()" class="action-btn btn-muted">Batal</button>
+            </div>
+        </form>
+    </div>
+
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+    <script>
+        const DEFAULT_ADZAN_URL = "https://archive.org/download/AdhanMakkah/adhan.mp3";
+        const LEGACY_ADZAN_URL = "https://ia800300.us.archive.org/24/items/AdhanMakkah/adhan.mp3";
+        const prayerNames = {
+            subuh: "Subuh",
+            terbit: "Terbit",
+            dzuhur: "Dzuhur",
+            ashar: "Ashar",
+            maghrib: "Maghrib",
+            isya: "Isya"
+        };
+        const prayerKeys = Object.keys(prayerNames);
+        const adzanPrayerKeys = ["subuh", "dzuhur", "ashar", "maghrib", "isya"];
+
+        const defaultMessages = [
+            "Selamat datang di Masjid Al-Ikhlas",
+            "Luruskan dan rapatkan shaf sebelum shalat",
+            "Mohon matikan atau senyapkan ponsel",
+            "Perbanyak shalawat dan dzikir menunggu iqamah",
+            "Jaga kebersihan dan ketertiban area masjid"
+        ];
+        const defaultHadith = {
+            arabic: "وَأَقِيمُوا الصَّلَاةَ وَآتُوا الزَّكَاةَ وَارْكَعُوا مَعَ الرَّاكِعِينَ",
+            text: "Dan dirikanlah shalat, tunaikanlah zakat dan rukuklah beserta orang-orang yang rukuk.",
+            source: "QS. Al-Baqarah: 43"
+        };
+        const defaultNewsItems = defaultMessages.map((message, index) => ({
+            id: `default-${index + 1}`,
+            date: getTodayKey(),
+            text: message
+        }));
+
+        let state = {
+            masjidName: localStorage.getItem("masjidName") || "Masjid Al-Ikhlas",
+            masjidAddress: localStorage.getItem("masjidAddress") || "Jl. Masjid Raya",
+            scheduleMode: localStorage.getItem("scheduleMode") || "auto",
+            cityId: localStorage.getItem("cityId") || "1301",
+            cityName: localStorage.getItem("cityName") || "KOTA JAKARTA",
+            newsItems: loadNewsItems(),
+            hadithArabic: localStorage.getItem("hadithArabic") || defaultHadith.arabic,
+            hadithText: localStorage.getItem("hadithText") || defaultHadith.text,
+            hadithSource: localStorage.getItem("hadithSource") || defaultHadith.source,
+            adzanEnabled: localStorage.getItem("adzanEnabled") || "on",
+            adzanUrl: normalizeAdzanUrl(localStorage.getItem("adzanUrl") || DEFAULT_ADZAN_URL),
+            manualTimes: loadManualTimes(),
+            timings: null,
+            currentDateKey: "",
+            triggeredAdzan: JSON.parse(localStorage.getItem("triggeredAdzan") || "{}"),
+            adzanPlaying: false,
+            marqueeIndex: 0,
+            newsPage: 1,
+            cityListData: []
+        };
+
+        function loadManualTimes() {
+            const saved = JSON.parse(localStorage.getItem("manualTimes") || "{}");
+            return {
+                subuh: saved.subuh || "04:30",
+                terbit: saved.terbit || "05:45",
+                dzuhur: saved.dzuhur || "12:00",
+                ashar: saved.ashar || "15:15",
+                maghrib: saved.maghrib || "18:00",
+                isya: saved.isya || "19:15"
+            };
+        }
+
+        function loadNewsItems() {
+            const saved = JSON.parse(localStorage.getItem("newsItems") || "null");
+            if (Array.isArray(saved) && saved.length) {
+                return saved.filter((item) => item && item.date && item.text);
+            }
+
+            const legacyText = localStorage.getItem("marqueeText");
+            if (legacyText) {
+                const today = getTodayKey();
+                const legacyItems = legacyText
+                    .split(/\r?\n/)
+                    .map((line) => line.trim())
+                    .filter(Boolean)
+                    .map((text, index) => ({ id: `legacy-${Date.now()}-${index}`, date: today, text }));
+                if (legacyItems.length) return legacyItems;
+            }
+
+            return [...defaultNewsItems];
+        }
+
+        function normalizeAdzanUrl(url) {
+            return url === LEGACY_ADZAN_URL ? DEFAULT_ADZAN_URL : url;
+        }
+
+        async function autoDetectCity() {
+            try {
+                const res = await fetch("https://ipapi.co/json/");
+                if (!res.ok) return;
+                const data = await res.json();
+                
+                if (data && data.city) {
+                    const cityName = data.city;
+                    const searchRes = await fetch(`https://api.myquran.com/v2/sholat/kota/cari/${cityName}`);
+                    const searchData = await searchRes.json();
+                    
+                    if (searchData.status && searchData.data && searchData.data.length > 0) {
+                        state.cityId = searchData.data[0].id;
+                        state.cityName = searchData.data[0].lokasi;
+                        
+                        localStorage.setItem("cityId", state.cityId);
+                        localStorage.setItem("cityName", state.cityName);
+                        
+                        if (state.scheduleMode === "auto") {
+                            fetchCityList();
+                            refreshSchedule();
+                            showToast(`Lokasi otomatis terdeteksi: ${state.cityName}`);
+                        }
+                    }
+                }
+            } catch (e) {
+                console.error("Gagal mendeteksi lokasi otomatis", e);
+            }
+        }
+
+        function init() {
+            renderCards();
+            updateForm();
+            updateUI();
+            handleModeChange();
+            updateAudioSource();
+            renderNewsTable();
+            renderActivityStrip();
+            fetchCityList();
+            refreshSchedule();
+            updateClock();
+            rotateMarquee(true);
+
+            setInterval(updateClock, 1000);
+            setInterval(refreshSchedule, 60 * 60 * 1000);
+            setInterval(() => rotateMarquee(false), 32000);
+
+            if (!localStorage.getItem("cityId") && state.scheduleMode === "auto") {
+                autoDetectCity();
+            }
+        }
+
+        function renderCards() {
+            document.getElementById("prayerCards").innerHTML = prayerKeys.map((key) => `
+                <article id="card-${key}" class="prayer-card prayer-card-${key}">
+                    <span class="prayer-name">${prayerNames[key]}</span>
+                    <span class="digital prayer-time">--:--</span>
+                </article>
+            `).join("");
+        }
+
+        async function fetchCityList() {
+            if (state.scheduleMode !== "auto") return;
+
+            try {
+                const res = await fetch("https://api.myquran.com/v2/sholat/kota/semua");
+                const data = await res.json();
+                
+                if (!Array.isArray(data.data)) throw new Error("Data kota tidak valid");
+
+                state.cityListData = data.data;
+                const datalist = document.getElementById("cityDataList");
+                datalist.innerHTML = data.data.map((city) => {
+                    return `<option value="${city.lokasi}"></option>`;
+                }).join("");
+
+                document.getElementById("inputCityName").value = state.cityName || "";
+            } catch (error) {
+                document.getElementById("cityHelp").innerText = "Gagal memuat daftar kota. Mode manual tetap bisa dipakai.";
+                showToast("Daftar kota belum bisa dimuat. Periksa koneksi internet browser.");
+            }
+        }
+
+        async function refreshSchedule() {
+            resetDailyTriggerIfNeeded();
+
+            if (state.scheduleMode === "manual") {
+                state.timings = { ...state.manualTimes, tanggal: "Jadwal manual" };
+                renderSchedule();
+                return;
+            }
+
+            await fetchJadwal();
+        }
+
+        async function fetchJadwal() {
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = now.getMonth() + 1;
+            const day = now.getDate();
+
+            try {
+                const res = await fetch(`https://api.myquran.com/v2/sholat/jadwal/${state.cityId}/${year}/${month}/${day}`);
+                const data = await res.json();
+
+                if (!data.status || !data.data || !data.data.jadwal) throw new Error("Jadwal tidak tersedia");
+
+                state.timings = data.data.jadwal;
+                state.cityName = data.data.lokasi || state.cityName;
+                localStorage.setItem("cityName", state.cityName);
+                renderSchedule();
+            } catch (error) {
+                state.timings = { ...state.manualTimes, tanggal: "Jadwal manual cadangan" };
+                renderSchedule();
+                showToast("Jadwal otomatis gagal dimuat. Untuk sementara memakai jadwal manual cadangan.");
+            }
+        }
+
+        function renderSchedule() {
+            prayerKeys.forEach((key) => {
+                const card = document.getElementById(`card-${key}`);
+                const value = sanitizeTime(state.timings?.[key]) || "--:--";
+                if (card) card.querySelector(".prayer-time").innerText = value;
+            });
+
+            document.getElementById("displayCity").innerText = state.scheduleMode === "auto" ? state.cityName : "Jadwal manual";
+            document.getElementById("scheduleModeBadge").innerText = state.scheduleMode === "auto" ? "Otomatis" : "Manual";
+        }
+
+        function updateClock() {
+            const now = new Date();
+            document.getElementById("mainClock").innerText = now.toLocaleTimeString("id-ID", { hour12: false });
+            document.getElementById("dateMasehi").innerText = now.toLocaleDateString("id-ID", {
+                weekday: "long",
+                year: "numeric",
+                month: "long",
+                day: "numeric"
+            });
+
+            try {
+                let hijriDate = new Intl.DateTimeFormat('id-ID-u-ca-islamic', {
+                    day: 'numeric',
+                    month: 'long',
+                    year: 'numeric'
+                }).format(now);
+                if (!hijriDate.match(/ H$/i) && !hijriDate.match(/ AH$/i)) {
+                    hijriDate += " H";
+                }
+                document.getElementById("dateHijri").innerText = hijriDate;
+            } catch (e) {
+                document.getElementById("dateHijri").innerText = state.timings?.tanggal || "--";
+            }
+
+            resetDailyTriggerIfNeeded();
+            if (state.timings) calculatePrayerState(now);
+        }
+
+        function calculatePrayerState(now) {
+            const currentSeconds = now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds();
+            const schedule = prayerKeys
+                .map((key) => ({ key, seconds: timeToSeconds(state.timings[key]) }))
+                .filter((item) => Number.isFinite(item.seconds))
+                .sort((a, b) => a.seconds - b.seconds);
+
+            if (!schedule.length) return;
+
+            let currentPrayer = null;
+            let upcoming = null;
+            let minDiff = Infinity;
+
+            schedule.forEach(({ key, seconds }) => {
+                const card = document.getElementById(`card-${key}`);
+                if (card) card.classList.remove("active-prayer", "current-prayer");
+
+                let diff = seconds - currentSeconds;
+                if (adzanPrayerKeys.includes(key) && diff <= 0 && Math.abs(diff) <= 60) maybeStartAdzan(key);
+                if (diff <= 0) currentPrayer = key;
+                if (diff <= 0) diff += 86400;
+                if (diff < minDiff) {
+                    minDiff = diff;
+                    upcoming = key;
+                }
+            });
+
+            if (!currentPrayer) currentPrayer = "isya";
+
+            const currentCard = document.getElementById(`card-${currentPrayer}`);
+            const nextCard = document.getElementById(`card-${upcoming}`);
+            if (currentCard) currentCard.classList.add("current-prayer");
+            if (nextCard) nextCard.classList.add("active-prayer");
+
+            document.getElementById("nextPrayerLabel").innerText = upcoming === "terbit" ? "Menuju Terbit" : `Menuju Adzan ${prayerNames[upcoming]}`;
+            document.getElementById("countdown").innerText = formatDuration(minDiff);
+        }
+
+        function maybeStartAdzan(key) {
+            const triggerKey = `${state.currentDateKey}-${key}`;
+            if (state.triggeredAdzan[triggerKey]) return;
+
+            state.triggeredAdzan[triggerKey] = true;
+            localStorage.setItem("triggeredAdzan", JSON.stringify(state.triggeredAdzan));
+            startAdzan(key);
+        }
+
+        function startAdzan(key = "", forcePlay = false) {
+            if (state.adzanEnabled !== "on" && !forcePlay) return;
+
+            const audio = document.getElementById("adzanAudio");
+            state.adzanPlaying = true;
+            document.getElementById("adzanStatusText").innerText = key ? `Waktunya Adzan ${prayerNames[key]}` : "Test Suara Adzan";
+            document.getElementById("adzanStatus").classList.add("show");
+            document.getElementById("mainBody").classList.add("flash-adzan");
+            document.getElementById("audioHint").classList.add("hidden");
+
+            audio.currentTime = 0;
+            audio.play().catch(() => {
+                document.getElementById("audioHint").classList.remove("hidden");
+                showToast("Audio belum bisa diputar. Coba isi Link Audio Adzan dengan adzan.mp3 dari folder yang sama, lalu klik Test Suara.");
+                stopAdzan();
+            });
+            audio.onended = stopAdzan;
+            audio.onerror = () => {
+                showToast("File audio adzan tidak ditemukan atau ditolak browser. Pakai file lokal adzan.mp3 agar lebih stabil.");
+                stopAdzan();
+            };
+        }
+
+        function stopAdzan() {
+            const audio = document.getElementById("adzanAudio");
+            audio.pause();
+            audio.currentTime = 0;
+            state.adzanPlaying = false;
+            document.getElementById("adzanStatus").classList.remove("show");
+            document.getElementById("mainBody").classList.remove("flash-adzan");
+        }
+
+        function testAdzan() {
+            state.adzanEnabled = document.getElementById("inputAdzan").value;
+            state.adzanUrl = document.getElementById("inputAdzanUrl").value.trim() || DEFAULT_ADZAN_URL;
+            updateAudioSource();
+            startAdzan("", true);
+            setTimeout(() => {
+                if (state.adzanPlaying) stopAdzan();
+            }, 12000);
+        }
+
+        function saveSettings() {
+            state.masjidName = document.getElementById("inputMasjid").value.trim() || "Masjid";
+            state.masjidAddress = document.getElementById("inputAddress").value.trim() || "Jl. Masjid Raya";
+            state.scheduleMode = document.getElementById("scheduleMode").value;
+            state.adzanEnabled = document.getElementById("inputAdzan").value;
+            state.adzanUrl = document.getElementById("inputAdzanUrl").value.trim() || DEFAULT_ADZAN_URL;
+            state.hadithArabic = document.getElementById("inputHadithArabic").value.trim() || defaultHadith.arabic;
+            state.hadithText = document.getElementById("inputHadithText").value.trim() || defaultHadith.text;
+            state.hadithSource = document.getElementById("inputHadithSource").value.trim() || defaultHadith.source;
+
+            if (state.scheduleMode === "auto") {
+                const inputCity = document.getElementById("inputCityName").value.trim().toUpperCase();
+                if (inputCity && state.cityListData) {
+                    const foundCity = state.cityListData.find(c => c.lokasi.toUpperCase() === inputCity) || 
+                                      state.cityListData.find(c => c.lokasi.toUpperCase().includes(inputCity));
+                    if (foundCity) {
+                        state.cityId = foundCity.id;
+                        state.cityName = foundCity.lokasi;
+                    }
+                }
+            }
+
+            prayerKeys.forEach((key) => {
+                state.manualTimes[key] = document.getElementById(`manual-${key}`).value || state.manualTimes[key];
+            });
+
+            localStorage.setItem("masjidName", state.masjidName);
+            localStorage.setItem("masjidAddress", state.masjidAddress);
+            localStorage.setItem("scheduleMode", state.scheduleMode);
+            localStorage.setItem("cityId", state.cityId);
+            localStorage.setItem("cityName", state.cityName);
+            localStorage.setItem("newsItems", JSON.stringify(state.newsItems));
+            localStorage.setItem("hadithArabic", state.hadithArabic);
+            localStorage.setItem("hadithText", state.hadithText);
+            localStorage.setItem("hadithSource", state.hadithSource);
+            localStorage.setItem("adzanEnabled", state.adzanEnabled);
+            localStorage.setItem("adzanUrl", state.adzanUrl);
+            localStorage.setItem("manualTimes", JSON.stringify(state.manualTimes));
+
+            updateAudioSource();
+            updateUI();
+            handleModeChange();
+            refreshSchedule();
+            rotateMarquee(true);
+            togglePanel(false);
+            showToast("Pengaturan berhasil disimpan.");
+        }
+
+        function updateUI() {
+            document.getElementById("displayMasjidName").innerText = state.masjidName;
+            document.getElementById("inputMasjid").value = state.masjidName;
+            document.getElementById("displayAddress").innerText = state.masjidAddress;
+            document.getElementById("inputAddress").value = state.masjidAddress;
+            document.getElementById("scheduleMode").value = state.scheduleMode;
+            document.getElementById("inputAdzan").value = state.adzanEnabled;
+            document.getElementById("inputAdzanUrl").value = state.adzanUrl === DEFAULT_ADZAN_URL ? "" : state.adzanUrl;
+            document.getElementById("inputHadithArabic").value = state.hadithArabic;
+            document.getElementById("inputHadithText").value = state.hadithText;
+            document.getElementById("inputHadithSource").value = state.hadithSource;
+            document.getElementById("hadithArabicDisplay").innerText = state.hadithArabic;
+            document.getElementById("hadithTextDisplay").innerText = state.hadithText;
+            document.getElementById("hadithSourceDisplay").innerText = state.hadithSource;
+            document.getElementById("scheduleModeBadge").innerText = state.scheduleMode === "auto" ? "Otomatis" : "Manual";
+        }
+
+        function updateForm() {
+            prayerKeys.forEach((key) => {
+                document.getElementById(`manual-${key}`).value = state.manualTimes[key];
+            });
+        }
+
+        function handleModeChange() {
+            const mode = document.getElementById("scheduleMode").value;
+            const isManual = mode === "manual";
+            document.getElementById("cityField").classList.toggle("hidden", isManual);
+            document.getElementById("manualTimes").classList.toggle("hidden", !isManual);
+
+            if (!isManual && (!state.cityListData || state.cityListData.length === 0)) {
+                state.scheduleMode = "auto";
+                fetchCityList();
+            }
+        }
+
+        function updateAudioSource() {
+            const audio = document.getElementById("adzanAudio");
+            const source = audio.querySelector("source");
+            const nextUrl = state.adzanUrl || DEFAULT_ADZAN_URL;
+            if (source.src !== nextUrl) {
+                source.src = nextUrl;
+                audio.load();
+            }
+        }
+
+        function rotateMarquee(forceRestart) {
+            const messages = getActiveNewsItems().map((item) => item.text);
+            const list = messages.length ? messages : defaultMessages;
+
+            if (state.marqueeIndex >= list.length) state.marqueeIndex = 0;
+            document.getElementById("displayMarquee").innerText = list[state.marqueeIndex];
+            state.marqueeIndex = (state.marqueeIndex + 1) % list.length;
+
+            if (forceRestart) restartMarqueeAnimation();
+        }
+
+        function getActiveNewsItems() {
+            return [...state.newsItems]
+                .filter((item) => item.text && item.date)
+                .sort((a, b) => b.date.localeCompare(a.date));
+        }
+
+        function renderActivityStrip() {
+            const container = document.getElementById("activityStrip");
+            if (!container) return;
+
+            const items = getActiveNewsItems().slice(0, 3);
+            const fallbackItems = [
+                { date: getTodayKey(), text: "Kajian rutin dan informasi masjid" },
+                { date: getTodayKey(), text: "Program kebersihan dan kemakmuran masjid" },
+                { date: getTodayKey(), text: "Pengumuman kegiatan jamaah" }
+            ];
+            const displayItems = [...items, ...fallbackItems].slice(0, 3);
+
+            container.innerHTML = `
+                <div class="activity-label">Kegiatan<br>Masjid:</div>
+                ${displayItems.map((item) => `
+                    <article class="activity-item">
+                        <div class="activity-title">${escapeHtml(item.text)}</div>
+                        <div class="activity-date">${formatDisplayDate(item.date)}</div>
+                    </article>
+                `).join("")}
+            `;
+        }
+
+        function restartMarqueeAnimation() {
+            const track = document.getElementById("marqueeTrack");
+            track.style.animation = "none";
+            track.offsetHeight;
+            track.style.animation = "";
+        }
+
+        function renderNewsTable() {
+            const body = document.getElementById("newsTableBody");
+            const info = document.getElementById("newsInfo");
+            const badge = document.getElementById("newsPageBadge");
+            if (!body || !info) return;
+
+            const search = (document.getElementById("newsSearch")?.value || "").toLowerCase();
+            const pageSize = Number(document.getElementById("newsPageSize")?.value || 10);
+            const filtered = getActiveNewsItems().filter((item) => {
+                return item.date.includes(search) || item.text.toLowerCase().includes(search);
+            });
+            const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
+            state.newsPage = Math.min(Math.max(1, state.newsPage), totalPages);
+            const startIndex = (state.newsPage - 1) * pageSize;
+            const visible = filtered.slice(startIndex, startIndex + pageSize);
+
+            if (!visible.length) {
+                body.innerHTML = `
+                    <tr>
+                        <td colspan="4" class="text-center text-slate-400">Belum ada data berita.</td>
+                    </tr>
+                `;
+                info.innerText = "Showing 0 to 0 of 0 entries";
+                if (badge) badge.innerText = "1";
+                return;
+            }
+
+            body.innerHTML = visible.map((item, index) => `
+                <tr>
+                    <td class="news-number">${startIndex + index + 1}</td>
+                    <td class="news-date">${item.date}</td>
+                    <td>${escapeHtml(item.text)}</td>
+                    <td class="news-actions">
+                        <button type="button" onclick="editNewsItem('${item.id}')" class="mini-btn btn-blue">Edit</button>
+                        <button type="button" onclick="deleteNewsItem('${item.id}')" class="mini-btn btn-danger">Hapus</button>
+                    </td>
+                </tr>
+            `).join("");
+            info.innerText = `Showing ${startIndex + 1} to ${startIndex + visible.length} of ${filtered.length} entries`;
+            if (badge) badge.innerText = String(state.newsPage);
+        }
+
+        function handleNewsSearch() {
+            state.newsPage = 1;
+            renderNewsTable();
+        }
+
+        function changeNewsPageSize() {
+            state.newsPage = 1;
+            renderNewsTable();
+        }
+
+        function changeNewsPage(direction) {
+            state.newsPage += direction;
+            renderNewsTable();
+        }
+
+        function openNewsForm(id = "") {
+            const modal = document.getElementById("newsModal");
+            const item = id ? state.newsItems.find((news) => news.id === id) : null;
+
+            document.getElementById("newsModalTitle").innerText = item ? "Edit Berita" : "Tambah Berita";
+            document.getElementById("newsEditId").value = item?.id || "";
+            document.getElementById("newsDateInput").value = item?.date || getTodayKey();
+            document.getElementById("newsTextInput").value = item?.text || "";
+            modal.classList.remove("hidden");
+            setTimeout(() => document.getElementById("newsTextInput").focus(), 50);
+        }
+
+        function closeNewsForm() {
+            document.getElementById("newsModal").classList.add("hidden");
+        }
+
+        function saveNewsItem(event) {
+            event.preventDefault();
+            const id = document.getElementById("newsEditId").value;
+            const date = document.getElementById("newsDateInput").value;
+            const text = document.getElementById("newsTextInput").value.trim();
+
+            if (!date || !text) {
+                showToast("Tanggal dan berita wajib diisi.");
+                return;
+            }
+
+            if (id) {
+                state.newsItems = state.newsItems.map((item) => item.id === id ? { ...item, date, text } : item);
+            } else {
+                state.newsItems.unshift({ id: `news-${Date.now()}`, date, text });
+            }
+
+            localStorage.setItem("newsItems", JSON.stringify(state.newsItems));
+            closeNewsForm();
+            renderNewsTable();
+            renderActivityStrip();
+            rotateMarquee(true);
+            showToast("Data berita berhasil disimpan.");
+        }
+
+        function editNewsItem(id) {
+            openNewsForm(id);
+        }
+
+        function deleteNewsItem(id) {
+            const item = state.newsItems.find((news) => news.id === id);
+            if (!item) return;
+            if (!confirm(`Hapus berita: "${item.text}"?`)) return;
+
+            state.newsItems = state.newsItems.filter((news) => news.id !== id);
+            localStorage.setItem("newsItems", JSON.stringify(state.newsItems));
+            renderNewsTable();
+            renderActivityStrip();
+            rotateMarquee(true);
+            showToast("Data berita berhasil dihapus.");
+        }
+
+        function togglePanel(force) {
+            const panel = document.getElementById("adminPanel");
+            const open = typeof force === "boolean" ? force : !panel.classList.contains("open");
+            panel.classList.toggle("open", open);
+        }
+
+        function toggleFullScreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen?.();
+            } else {
+                document.exitFullscreen?.();
+            }
+        }
+
+        function resetDailyTriggerIfNeeded() {
+            const today = getTodayKey();
+            if (state.currentDateKey === today) return;
+
+            state.currentDateKey = today;
+            state.triggeredAdzan = Object.fromEntries(
+                Object.entries(state.triggeredAdzan).filter(([key]) => key.startsWith(today))
+            );
+            localStorage.setItem("triggeredAdzan", JSON.stringify(state.triggeredAdzan));
+        }
+
+        function getTodayKey() {
+            const now = new Date();
+            return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
+        }
+
+        function sanitizeTime(value) {
+            const match = String(value || "").match(/^(\d{1,2}):(\d{2})/);
+            if (!match) return "";
+            return `${match[1].padStart(2, "0")}:${match[2]}`;
+        }
+
+        function timeToSeconds(value) {
+            const time = sanitizeTime(value);
+            if (!time) return NaN;
+            const [hours, minutes] = time.split(":").map(Number);
+            return hours * 3600 + minutes * 60;
+        }
+
+        function formatDuration(totalSeconds) {
+            const seconds = Math.max(0, Math.floor(totalSeconds));
+            const h = Math.floor(seconds / 3600);
+            const m = Math.floor((seconds % 3600) / 60);
+            const s = seconds % 60;
+            return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
+        }
+
+        function formatDisplayDate(value) {
+            const date = new Date(`${value}T00:00:00`);
+            if (Number.isNaN(date.getTime())) return value;
+            return date.toLocaleDateString("id-ID", {
+                weekday: "long",
+                day: "2-digit",
+                month: "2-digit",
+                year: "numeric"
+            });
+        }
+
+        function escapeHtml(value) {
+            return String(value)
+                .replaceAll("&", "&amp;")
+                .replaceAll("<", "&lt;")
+                .replaceAll(">", "&gt;")
+                .replaceAll('"', "&quot;")
+                .replaceAll("'", "&#039;");
+        }
+
+        function showToast(message) {
+            const toast = document.getElementById("toast");
+            toast.innerText = message;
+            toast.classList.add("show");
+            clearTimeout(showToast.timer);
+            showToast.timer = setTimeout(() => toast.classList.remove("show"), 3600);
+        }
+
+        init();
+    </script>
+</body>
+
+</html>
